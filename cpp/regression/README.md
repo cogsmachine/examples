@@ -5,14 +5,14 @@ Trains a single fully-connected layer to fit a 4th degree polynomial.
 To build the code, run the following commands from your terminal:
 
 ```shell
-$ cd mnist
+$ cd regression
 $ mkdir build
 $ cd build
 $ cmake -DCMAKE_PREFIX_PATH=/path/to/libtorch ..
 $ make
 ```
 
-where `/path/to/libtorch` should be the path to the unzipped *LibTorch*
+where `/path/to/libtorch` should be the path to the unzipped _LibTorch_
 distribution, which you can get from the [PyTorch
 homepage](https://pytorch.org/get-started/locally/).
 

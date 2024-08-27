@@ -1,18 +1,15 @@
 ###############################################################################
 # Language Modeling on Wikitext-2
 #
-# This file generates new sentences sampled from the language model
+# This file generates new sentences sampled from the language model.
 #
 ###############################################################################
-
 import argparse
-
 import torch
 
 import data
 
 parser = argparse.ArgumentParser(description='PyTorch Wikitext-2 Language Model')
-
 # Model parameters.
 parser.add_argument('--data', type=str, default='./data/wikitext-2',
                     help='location of the data corpus')
@@ -26,6 +23,8 @@ parser.add_argument('--seed', type=int, default=1111,
                     help='random seed')
 parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
+parser.add_argument('--mps', action='store_true', default=False,
+                        help='enables macOS GPU training')
 parser.add_argument('--temperature', type=float, default=1.0,
                     help='temperature - higher will increase diversity')
 parser.add_argument('--log-interval', type=int, default=100,
@@ -36,15 +35,24 @@ args = parser.parse_args()
 torch.manual_seed(args.seed)
 if torch.cuda.is_available():
     if not args.cuda:
-        print("WARNING: You have a CUDA device, so you should probably run with --cuda")
-
-device = torch.device("cuda" if args.cuda else "cpu")
+        print("WARNING: You have a CUDA device, so you should probably run with --cuda.")
+if torch.backends.mps.is_available():
+    if not args.mps:
+        print("WARNING: You have mps device, to enable macOS GPU run with --mps.")
+        
+use_mps = args.mps and torch.backends.mps.is_available()
+if args.cuda:
+    device = torch.device("cuda")
+elif use_mps:
+    device = torch.device("mps")
+else:
+    device = torch.device("cpu")
 
 if args.temperature < 1e-3:
-    parser.error("--temperature has to be greater or equal 1e-3")
+    parser.error("--temperature has to be greater or equal 1e-3.")
 
 with open(args.checkpoint, 'rb') as f:
-    model = torch.load(f).to(device)
+    model = torch.load(f, map_location=device)
 model.eval()
 
 corpus = data.Corpus(args.data)

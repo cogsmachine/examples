@@ -6,8 +6,8 @@ import torch
 import torch.optim as O
 import torch.nn as nn
 
-from torchtext import data
-from torchtext import datasets
+from torchtext.legacy import data
+from torchtext.legacy import datasets
 
 from model import SNLIClassifier
 from util import get_args, makedirs
@@ -17,6 +17,8 @@ args = get_args()
 if torch.cuda.is_available():
     torch.cuda.set_device(args.gpu)
     device = torch.device('cuda:{}'.format(args.gpu))
+elif torch.backends.mps.is_available():
+    device = torch.device('mps')
 else:
     device = torch.device('cpu')
 
@@ -119,7 +121,7 @@ for epoch in range(args.epochs):
                 epoch, iterations, 1+batch_idx, len(train_iter),
                 100. * (1+batch_idx) / len(train_iter), loss.item(), dev_loss.item(), train_acc, dev_acc))
 
-            # update best valiation set accuracy
+            # update best validation set accuracy
             if dev_acc > best_dev_acc:
 
                 # found a model with better validation set accuracy
@@ -140,3 +142,5 @@ for epoch in range(args.epochs):
             print(log_template.format(time.time()-start,
                 epoch, iterations, 1+batch_idx, len(train_iter),
                 100. * (1+batch_idx) / len(train_iter), loss.item(), ' '*8, n_correct/n_total*100, ' '*12))
+        if args.dry_run:
+            break
